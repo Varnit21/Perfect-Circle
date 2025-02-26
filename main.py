@@ -1,40 +1,41 @@
-# Created for the Perfect Circle game on https://neal.fun/perfect-circle/
-# Coded by Nick Roussis (Neek8044)
-# Github: https://github.com/neek8044/Perfect-Circle
-# Licensed under Apache License 2.0 (see github ^)
-
 import pyautogui
-import math
 import time
+import math
 
-# Recommended to use 3 as the SPEED factor. You might need to change the RADIUS based on your monitor resolution.
-# Both of these settings work well on FHD:1920x1080
-SPEED = 3
-RADIUS = 494
-# If on fullscreen, leave those as they are. If not, change the Y_OFFSET to around 5.6.
-# No use to change the X_OFFSET unless you have a double monitor.
-X_OFFSET = 0
-Y_OFFSET = 0
+# Circle settings
+radius = 300  # Optimal radius for accuracy, change it according to your screen's resolution
 
-def getX(t, rad):
-    return ((pyautogui.size()[0] / 2) + math.cos(t) * rad) + Y_OFFSET
+# Get the screen center
+screen_width, screen_height = pyautogui.size()
+center_x, center_y = screen_width // 2, screen_height // 2
 
-def getY(t, rad):
-    return ((pyautogui.size()[1] / 2) + math.sin(t) * rad) + X_OFFSET
+# Function to calculate a point on the circle for a given angle
+def calculate_point(angle):
+    x = center_x + radius * math.cos(math.radians(angle))
+    y = center_y + radius * math.sin(math.radians(angle))
+    return (x, y)
 
-print('\n--> Place your cursor on the website while on fullscreen.\n\n(Ctrl+C to stop)\n')
-try:
-    time.sleep(3)
-    for i in range(5):
-        print(str(5 - i) + ' seconds left.')
-        time.sleep(1)
-except KeyboardInterrupt:
-    print('Aborted.')
-    exit()
+# Using only 3 points for minimal deviation
+touch_points = [
+    calculate_point(0),    # Right (0°)
+    calculate_point(120),  # Bottom-left (120°)
+    calculate_point(240),  # Top-left (240°)
+]
 
-pyautogui.moveTo(getX(0, RADIUS), getY(0, RADIUS))
-pyautogui.mouseDown(button="left")
-for i in range(SPEED + 2):
-    t = i * math.pi / (SPEED / 2)
-    pyautogui.moveTo(getX(t, RADIUS), getY(t, RADIUS), duration=0)
-pyautogui.mouseUp(button='left')
+# Countdown to switch to the game
+print("Switch to the game! Starting in 3 seconds...")
+time.sleep(3)
+
+# Start drawing
+pyautogui.moveTo(*touch_points[0])
+pyautogui.mouseDown()
+
+# Touch the 3 key points with minimal movement
+for x, y in touch_points:
+    pyautogui.moveTo(x, y, duration=0.002)  # Super fast transition
+
+# Close the loop by returning to the first touch point
+pyautogui.moveTo(*touch_points[0], duration=0.002)
+pyautogui.mouseUp()
+
+print("Perfect circle!")
